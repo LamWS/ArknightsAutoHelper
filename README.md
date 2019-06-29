@@ -1,8 +1,8 @@
 # Arknghts Auto Helper
-> 明日方舟辅助脚本，当然只是开发阶段
+> 明日方舟辅助脚本，该主分支为脚本操作，release分支下有GUI版本以及下载地址
 
-## 0x01 ADBShell 
-基于夜神模拟器集成了多种adb操作方法，可以进行安卓辅助开发。当然你要在电脑端跑
+## 0x01 设置相关 
+> 该脚本基于夜神模拟器集成了多种adb操作方法，可以进行安卓辅助开发。当然你要在电脑端跑
 
 ### 运行须知
 
@@ -18,27 +18,12 @@
 
 
 **非常重要的路径设置**
-在config.py底下要改三个路径，如下所示
+在config.py底下要改一个路径，如下所示
 
 -  ADB_ROOT 
         这个路径为你 安卓模拟器adb工具的路径 （一般安卓电脑模拟器都有，所以设置成模拟器路径即可）
--  STORAGE_PATH 
-        也就是目录底下的 storage 文件夹，请确保是绝对路径
--  SCREEN_SHOOT_SAVE_PATH
-        也就是目录底下的 screen_shoot 文件夹，用来存放一些截图
-
-有人问我为啥是绝对路径，因为之后会有 os.chdir()的操作，所以建议全部写成绝对路径，就像如下所示：
-
-
 ```python
 ADB_ROOT = r"D:\Program Files\Nox\bin"
-SCREEN_SHOOT_SAVE_PATH = "D:\\python_box\\shaobao_adb\\screen_shoot\\"
-STORAGE_PATH = "D:\\python_box\\shaobao_adb\\storage\\"
-
-# ADB_HOST = "127.0.0.1:62001"  # 如果你不想用多开器的功能，请用此行配置
-ADB_HOST = ""  # 如果你想用多开器的功能，请使用此行配置，并手动选择或在启动时自行添加HOST。
-# 另外推荐将这里的ADB_HOST 赋值为空字符串，如果仅有一台设备连接，系统会自动读取到设备名称
-# 目前多开设备可能存在读写问题。后期会调整路径设置。
 ```
 
 **OCR高级选项设置**
@@ -62,47 +47,15 @@ API_KEY = '你的 Api Key'
 SECRET_KEY = '你的 Secret Key'
 ```
 
-#### 依赖包
-
-```python
-# python 版本 3.6 + 
-Package    Version
----------- --------
-baidu-aip  2.2.13.0
-certifi    2019.3.9
-chardet    3.0.4
-idna       2.8
-mp3play    0.1.15
-numpy      1.16.4
-Pillow     6.0.0
-pip        10.0.1
-requests   2.21.0
-setuptools 39.1.0
-six        1.12.0
-soupsieve  1.9.1
-urllib3    1.24.2
-wxPython   4.0.6
-```
+#### 依赖包相关
 
 一键安装所有依赖
 ```python
 $ pip install -r requirement.txt
 ```
 
-### 目前支持的功能
-
- - ADB 指令
- - 点击动作
- - 拖动动作
- - 截图动作
- - 获取子图
- - 子图与目标子图比较
- - OCR 检测识别
- - 百度OCR （感谢群友的贡献，目前该功能基本完善，如有BUG请多多包涵）
- - 待开发的 GUI 功能
-
-## 0x02 ArknightsHelper
-> 需要安装OCR模块;感谢群友的贡献！
+## 0x02 ArknightsHelper 脚本启动
+> 推荐安装OCR模块;感谢群友的贡献！关于OCR安装的文档可以查看OCR_install.md
 
 ### 快速启动！快乐护肝！
 
@@ -174,18 +127,16 @@ Ark = ArknightsHelper(100)#
 Ark.main_handler(TASK_LIST)
 ```
 
-### wxpython 的用法
+## 0x03 ArknightsHelper GUI
 
-目前GUI功能还在测试中，会在之后的时日里日渐完善。现在的样子如下所示.
+目前GUI功能还在测试中，会在之后的时日里日渐完善。关于GUI版本的用法，请转到 release 分支下查看
 
-![TIM图片20190610221825.png-229.9kB][2]
+请注意 release分支下的设置文件全部是json格式的，相关要求和主分支下的config文件相同。
 
-启动方法很简单，执行 GUI_start.py即可
+![TIM图片20190612102050.png-48.6kB][2]
 
-```python
-from GUI import start_app
-start_app()
-```
+
+## 0x03 自定义开发与TODO
 
 ### 关于后续的想法
 
@@ -200,23 +151,15 @@ start_app()
 ### 自定义开发与更多功能
 
 详情请联系作者或者提出你的issue！祝大家玩的愉快
+
 欢迎来加好友QQ 2454225341
 
 也可以来加群
+
+
 ![qrcode_1558871927006.jpg-60.7kB][3]
 
-在自定义开发之前，请把`config/__init__.py`改正为
-```python
-from config.config import *
-# 备注:为了开发方便，应该将上面一行注释打开，不然你会看到你的编译器一片冒红
-# 为此你需要同步 setting 文件的配置
-from config.shell_color import ShellColor, BufferColor
-# from config.load_settings import *
-```
-不然你会看见你的IDE一片红。这么写的原因是方便GUI来进行设置。
-
-
-## 0x03 关于一些常见的问题
+## 0x04 关于一些常见的问题
 
 1. 分辨率/模拟器/路径问题
 请看README
@@ -228,10 +171,10 @@ from config.shell_color import ShellColor, BufferColor
 推荐安装GUI模块。因为这样能让一些地方的容错率变高。关于OCR的安装可以看文档。有人提议咱们可以用抓包来做。之后我会考虑这个功能，如果时间充裕的话（很显然是不充足的）
 4. 我不会python|我电脑里没装Python，我能用这个嚒？
 不能。我没有精力去给你整个exe文件。但是你也许可以通过我的代码学习一些Python的小技巧。
-
-
+5. 之后会收费么？
+不会，该项目一直开源。实际上作者还有别的事情要做，代码可能突然会有一段时间不更新了。
 
 
   [1]: http://static.zybuluo.com/shaobaobaoer/7ifp1acn3an7a3z23t96owt1/TIM%E6%88%AA%E5%9B%BE20190530114456.png
-  [2]: http://static.zybuluo.com/shaobaobaoer/jnij799nbeeg2c81ixltzcwv/TIM%E5%9B%BE%E7%89%8720190610221825.png
+  [2]: http://static.zybuluo.com/shaobaobaoer/860t36w2ygsvet6sxn3lv3ty/TIM%E5%9B%BE%E7%89%8720190612102050.png
   [3]: http://static.zybuluo.com/shaobaobaoer/14ufv5gx72buoo1vyaa9jmgy/qrcode_1558871927006.jpg

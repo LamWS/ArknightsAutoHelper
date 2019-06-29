@@ -1,4 +1,3 @@
-import os
 from ADBShell import ADBShell
 from time import sleep
 from Arknights.click_location import *
@@ -9,14 +8,15 @@ from Arknights.flags import *
 from Baidu_api import *
 from Arknights.Binarization import binarization_image
 from config import *
+import os
 
 os.path.join(os.path.abspath('../'))
+
 
 class ArknightsHelper(object):
     def __init__(self, current_strength=None, adb_host=None,
                  out_put=0, call_by_gui=False):
         '''
-
         :param current_strength:
         :param adb_host:
         :param out_put:  0 default with console
@@ -37,7 +37,6 @@ class ArknightsHelper(object):
         # 为了让 GUI 启动快一些，这里关闭了激活ocr的选项以及确认游戏开启的设置
         if not call_by_gui:
             self.is_ocr_active(current_strength)
-            self.__check_game_active()
 
     def __ocr_check(self, file_path, save_path, option=None, change_image=True):
         """
@@ -78,6 +77,7 @@ class ArknightsHelper(object):
         :param current_strength: 当前理智
         :return:
         """
+        global enable_api
         self.__ocr_check(STORAGE_PATH + "OCR_TEST_1.png", SCREEN_SHOOT_SAVE_PATH + "ocr_test_result", "--psm 7",
                          change_image=False)
         try:
@@ -128,9 +128,13 @@ class ArknightsHelper(object):
                                 .format(STORAGE_PATH + "package.txt"))
         self.adb.run_cmd(DEBUG_LEVEL=0)
 
-    def __check_game_active(self):
+    def check_game_active(self):
+        '''
+        该命令是启动 官服的 明日方舟的函数
+        在之后的GUI里调用。启动脚本的时候不调用了。默认你已经打开了
+        :return:
+        '''
         self.__check_apk_info_active()
-
         with open(STORAGE_PATH + "current.txt", 'r', encoding='utf8') as f:
             if ArkNights_PACKAGE_NAME in f.read():
                 self.__is_game_active = True
@@ -171,15 +175,15 @@ class ArknightsHelper(object):
             pass
 
     def module_login(self):
-        self.__wait(SECURITY_WAIT)
+        # self.__wait(SECURITY_WAIT)
         self.adb.get_mouse_click(
             XY=CLICK_LOCATION['LOGIN_QUICK_LOGIN']
         )
-        self.__wait(SECURITY_WAIT)
+        self.__wait(BIG_WAIT)
         self.adb.get_mouse_click(
             XY=CLICK_LOCATION['LOGIN_START_WAKEUP']
         )
-        self.__wait(SECURITY_WAIT)
+        self.__wait(BIG_WAIT)
 
     def module_battle_slim(self, c_id, set_count=1000, set_ai=False, **kwargs):
         """
@@ -220,6 +224,9 @@ class ArknightsHelper(object):
         if not set_ai:
             self.set_ai_commander()
 
+        if set_count == 0:
+            return True
+
         strength_end_signal = False
         count = 0
         while not strength_end_signal:
@@ -248,8 +255,8 @@ class ArknightsHelper(object):
             while not battle_end_signal:
                 # 先打个60S，不检测
                 if t == 0:
-                    self.__wait(60)
-                    t += 60
+                    self.__wait(BATTLE_NONE_DETECT_TIME)
+                    t += BATTLE_NONE_DETECT_TIME
                 else:
                     self.__wait(BATTLE_FINISH_DETECT)
                 t += BATTLE_FINISH_DETECT
@@ -353,7 +360,7 @@ class ArknightsHelper(object):
             self.__ocr_check(SCREEN_SHOOT_SAVE_PATH + "is_setting.png",
                              SCREEN_SHOOT_SAVE_PATH + "1",
                              "--psm 7 -l chi_sim")
-            end_text = "保持"
+            end_text = "设置"
             f = open(SCREEN_SHOOT_SAVE_PATH + "1.txt", 'r', encoding="utf8")
             tmp = f.readline()
             if end_text in tmp:
@@ -411,7 +418,7 @@ class ArknightsHelper(object):
             self.shell_color.failure_text("[!] ⚠ 任务清单为空")
 
         for c_id, count in battle_task_list.items():
-            if c_id not in LIZHI_CONSUME.keys():
+            if c_id not in MAIN_TASK_SUPPORT.keys():
                 raise IndexError("无此关卡")
             self.shell_color.helper_text("[+] 战斗-选择{}...启动！".format(c_id))
             self.selector.id = c_id
@@ -419,16 +426,21 @@ class ArknightsHelper(object):
             # flag = self.module_battle_for_test(c_id, count)
 
         if flag:
-            self.shell_color.warning_text("[*] 所有模块执行完毕...无限休眠启动！")
             if not self.__call_by_gui:
+                self.shell_color.warning_text("[*] 所有模块执行完毕...无限休眠启动！")
                 self.__wait(1024)
                 self.shell_color.failure_text("[*] 休眠过度...启动自毁程序！")
                 self.__del()
+            else:
+                self.shell_color.warning_text("[*] 所有模块执行完毕...！")
         else:
-            self.shell_color.failure_text("[*] 未知模块异常...无限休眠启动！")
-            self.__wait(1024)
-            self.shell_color.failure_text("[*] 休眠过度...启动自毁程序！")
-            self.__del()
+            if not self.__call_by_gui:
+                self.shell_color.failure_text("[*] 未知模块异常...无限休眠启动！")
+                self.__wait(1024)
+                self.shell_color.failure_text("[*] 休眠过度...启动自毁程序！")
+                self.__del()
+            else:
+                self.shell_color.failure_text("[*] 未知模块异常...系统体现结束")
 
     def restart(self):
         """
@@ -595,7 +607,7 @@ class ArknightsHelper(object):
 
         elif mode == 2:
             try:
-                X = DAILY_LIST[mode][self.selector.get_week()][c_id[0:2]]
+                X = DAILY_LIST[str(mode)][self.selector.get_week()][c_id[0:2]]
             except Exception as e:
                 self.shell_color.failure_text(e.__str__() + '\tclick_location 文件配置错误')
                 X = None
@@ -617,7 +629,7 @@ class ArknightsHelper(object):
                 )
         elif mode == 3:
             try:
-                X = DAILY_LIST[mode][self.selector.get_week()][c_id[3]]
+                X = DAILY_LIST[str(mode)][self.selector.get_week()][c_id[3]]
             except Exception as e:
                 self.shell_color.failure_text(e.__str__() + '\tclick_location 文件配置错误')
                 X = None
