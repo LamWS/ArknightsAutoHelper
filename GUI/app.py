@@ -15,7 +15,6 @@ from GUI.Settings import *
 
 global enable_init_ark_on_start
 
-
 #
 # class IsArkActive(object):
 #     def __init__(self, ark=None):
@@ -56,7 +55,7 @@ class ArknightsAutoHelperGUI(wx.App):
 
     def start_ark(self, event):
         try:
-            self.ark = ArknightsHelper(call_by_gui=True, out_put=1)
+            self.ark = ArknightsHelper(call_by_gui=True, out_put=False)
             if not enable_init_ark_on_start:
                 self.ark.is_ocr_active(self.ark.CURRENT_STRENGTH)
                 self.Index.m_statusBar1.PushStatusText("初始化完毕") if self.ark.ocr_active \
@@ -95,7 +94,7 @@ class ArknightsAutoHelperGUI(wx.App):
 
     def backend_buffer_push(self):
         if self.__is_ark_init:
-            buffer = self.ark.shell_color.get_buffer()
+            buffer = self.ark.shell_log.get_buffer()
             if buffer != "":
                 self.Index.out_put_ctrl.AppendText(buffer)
             if not self.__current_lizhi_onchange_lock:
@@ -196,15 +195,17 @@ class ArknightsAutoHelperGUI(wx.App):
         :return: True：启动
                  False： 需要关闭模块
         """
-        if 'main_battle' in self.worker.keys() or self.worker['main_battle'].is_alive():
+        if 'main_battle' in self.worker.keys():
             if not self.worker['main_battle'].is_alive():
                 del self.worker['main_battle']
+                return self.check_before_start()
             else:
                 MessageDialog_OK("请先关闭主战斗模块模块")
                 return False
-        elif 'slim_battle' in self.worker.keys() or self.worker['slim_battle'].is_alive():
+        elif 'slim_battle' in self.worker.keys():
             if not self.worker['slim_battle'].is_alive():
                 del self.worker['slim_battle']
+                return self.check_before_start()
             else:
                 MessageDialog_OK("请先关闭简易战斗模块模块")
                 return False
